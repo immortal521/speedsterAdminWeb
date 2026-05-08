@@ -1,10 +1,16 @@
 import { useState } from 'react';
-import { Form, Input, Button, Card, message } from 'antd';
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
+import { Button, Card, Form, Input, message } from 'antd';
+
+import { setToken } from '../../store/slices/userSlice';
+import request from '../../utils/request';
 
 export default function Login() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
 
   // 登录表单提交
@@ -12,14 +18,14 @@ export default function Login() {
     setLoading(true);
     try {
       // 这里写你的登录接口请求
-      console.log('登录信息：', values);
+      const res = await request.post('/api/v1/auth/login', values);
 
       // 登录成功后：存redux + 跳转首页
-      // dispatch(loginAction(values))
+      dispatch(setToken(res.data.token));
       message.success('登录成功');
       navigate('/');
     } catch {
-      message.error('账号密码错误，请重试');
+      // message.error('账号密码错误，请重试');
     } finally {
       setLoading(false);
     }
@@ -30,7 +36,7 @@ export default function Login() {
       <Card title="系统登录" style={{ width: 400 }}>
         <Form name="login" autoComplete="off" onFinish={onFinish}>
           {/* 账号输入框 */}
-          <Form.Item name="username" rules={[{ required: true, message: '请输入账号' }]}>
+          <Form.Item name="account" rules={[{ required: true, message: '请输入账号' }]}>
             <Input prefix={<UserOutlined />} placeholder="请输入账号" />
           </Form.Item>
 
