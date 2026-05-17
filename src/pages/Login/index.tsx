@@ -18,7 +18,7 @@ export default function Login() {
     setLoading(true);
     try {
       // 这里写你的登录接口请求
-      const res = await request.post('/api/v1/auth/login', values);
+      const res = await request.post('/api/user/login', values);
 
       // 登录成功后：存redux + 跳转首页
       dispatch(setToken(res.data.token));
@@ -36,7 +36,7 @@ export default function Login() {
       <Card title="系统登录" style={{ width: 400 }}>
         <Form name="login" autoComplete="off" onFinish={onFinish}>
           {/* 账号输入框 */}
-          <Form.Item name="account" rules={[{ required: true, message: '请输入账号' }]}>
+          <Form.Item name="username" rules={[{ required: true, message: '请输入账号' }]}>
             <Input prefix={<UserOutlined />} placeholder="请输入账号" />
           </Form.Item>
 

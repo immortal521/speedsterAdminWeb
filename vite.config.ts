@@ -9,7 +9,7 @@ export default defineConfig({
         target: 'http://14.103.249.252:9527', // 后端接口地址
         changeOrigin: true,
 
-        // rewrite: (path) => path.replace(/^\/api/, ''),
+        rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
   },
