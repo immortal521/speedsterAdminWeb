@@ -1,5 +1,7 @@
-import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
+
+import { fetchLogin, fetchUserProfile, type ILoginParams } from '../../api/user';
+import { clearAuth, getToken, setToken as saveToken } from '../../utils/auth';
 
 interface User {
   id: number;
@@ -18,25 +20,24 @@ interface UserState {
 
 const initialState: UserState = {
   user: null,
-  token: localStorage.getItem('token'),
-  isAuthenticated: !!localStorage.getItem('token'),
+  token: getToken(),
+  isAuthenticated: !!getToken(),
   loading: false,
   error: null,
 };
 
 // 异步登录
-export const login = createAsyncThunk(
-  'user/login',
-  async (credentials: { username: string; password: string }) => {
-    const response = await axios.post('/api/auth/login', credentials);
-    return response.data; // 假设返回 { user, token }
-  },
-);
+export const login = createAsyncThunk('user/login', async (credentials: ILoginParams) => {
+  return fetchLogin(credentials);
+});
 
 // 异步获取用户信息
 export const fetchUserInfo = createAsyncThunk('user/fetchUserInfo', async () => {
-  const response = await axios.get('/api/user/profile');
-  return response.data;
+  const user = await fetchUserProfile();
+  if (!user) {
+    throw new Error('获取用户信息失败');
+  }
+  return user;
 });
 
 export const userSlice = createSlice({
@@ -49,14 +50,14 @@ export const userSlice = createSlice({
     },
     setToken: (state, action: PayloadAction<string>) => {
       state.token = action.payload;
-      localStorage.setItem('token', action.payload);
+      saveToken(action.payload);
       state.isAuthenticated = true;
     },
     logout: (state) => {
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
-      localStorage.removeItem('token');
+      clearAuth();
     },
     clearError: (state) => {
       state.error = null;
@@ -71,10 +72,12 @@ export const userSlice = createSlice({
       })
       .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload.user;
         state.token = action.payload.token;
+        if (action.payload.user) {
+          state.user = action.payload.user;
+        }
         state.isAuthenticated = true;
-        localStorage.setItem('token', action.payload.token);
+        saveToken(action.payload.token);
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;

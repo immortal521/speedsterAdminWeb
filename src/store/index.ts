@@ -1,11 +1,8 @@
-import { configureStore, combineReducers } from '@reduxjs/toolkit';
+import { combineReducers, configureStore } from '@reduxjs/toolkit';
 
-// 临时占位 reducer
-const counterReducer = (state = { value: 0 }) => state;
-const userReducer = (state = { user: null, token: null }) => state;
+import userReducer from './slices/userSlice';
 
 const rootReducer = combineReducers({
-  counter: counterReducer,
   user: userReducer,
 });
 
@@ -16,5 +13,3 @@ export const store = configureStore({
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
-
-// 不需要导出 persistor

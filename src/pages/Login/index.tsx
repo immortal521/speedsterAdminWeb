@@ -1,33 +1,25 @@
-import { useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Card, Form, Input, message } from 'antd';
 
-import { setToken } from '../../store/slices/userSlice';
-import request from '../../utils/request';
+import type { ILoginParams } from '../../api/user';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { login, selectUserLoading } from '../../store/slices/userSlice';
 
 export default function Login() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const [loading, setLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const loading = useAppSelector(selectUserLoading);
 
   // 登录表单提交
-  const onFinish = async (values: Record<string, unknown>) => {
-    setLoading(true);
+  const onFinish = async (values: ILoginParams) => {
     try {
-      // 这里写你的登录接口请求
-      const res = await request.post('/api/user/login', values);
-
-      // 登录成功后：存redux + 跳转首页
-      dispatch(setToken(res.data.token));
+      await dispatch(login(values)).unwrap();
       message.success('登录成功');
       navigate('/');
     } catch {
-      // message.error('账号密码错误，请重试');
-    } finally {
-      setLoading(false);
+      // 错误提示由 request 拦截器统一处理
     }
   };
 
