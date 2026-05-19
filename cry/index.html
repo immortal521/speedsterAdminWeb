@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Go WASM AES</title>
+</head>
+<body>
+<script src="wasm_exec.js"></script>
+<script>
+  const go = new Go(); // wasm_exec.js 提供
+  WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
+    go.run(result.instance);
+
+    const text = "Hello Go WASM";
+
+    const cipher = encryptAES(text);
+    console.log("Encrypted:", cipher);
+
+    const plain = decryptAES(cipher);
+    console.log("Decrypted:", plain);
+  });
+</script>
+</body>
+</html>
