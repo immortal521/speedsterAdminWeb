@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-import { fetchLogin, fetchUserProfile, type ILoginParams } from '../../api/user';
+import { fetchLogin, type ILoginParams } from '../../api/user';
 import { clearAuth, getToken, setToken as saveToken } from '../../utils/auth';
 
 interface User {
@@ -32,13 +32,6 @@ export const login = createAsyncThunk('user/login', async (credentials: ILoginPa
 });
 
 // 异步获取用户信息
-export const fetchUserInfo = createAsyncThunk('user/fetchUserInfo', async () => {
-  const user = await fetchUserProfile();
-  if (!user) {
-    throw new Error('获取用户信息失败');
-  }
-  return user;
-});
 
 export const userSlice = createSlice({
   name: 'user',
@@ -73,27 +66,12 @@ export const userSlice = createSlice({
       .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
         state.token = action.payload.token;
-        if (action.payload.user) {
-          state.user = action.payload.user;
-        }
         state.isAuthenticated = true;
         saveToken(action.payload.token);
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || '登录失败';
-      })
-      // 获取用户信息
-      .addCase(fetchUserInfo.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(fetchUserInfo.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload;
-      })
-      .addCase(fetchUserInfo.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || '获取用户信息失败';
       });
   },
 });

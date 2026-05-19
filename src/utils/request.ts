@@ -1,5 +1,10 @@
 import { notification } from 'antd';
-import type { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import type {
+  AxiosError,
+  AxiosRequestConfig,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+} from 'axios';
 import axios from 'axios';
 
 import { clearAuth, getToken } from './auth';
@@ -18,7 +23,7 @@ declare module 'axios' {
 export interface ApiResponse<T = unknown> {
   code: number;
   data: T;
-  message: string;
+  msg: string;
   success: boolean;
 }
 
@@ -30,8 +35,10 @@ export interface PaginatedData<T = unknown> {
   pageSize: number;
 }
 
-// 创建 axios 实例
-const request = axios.create({
+type RequestConfig = AxiosRequestConfig;
+
+// 内部 axios 实例（拦截器必须返回 AxiosResponse）
+const http = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '',
   timeout: 15000,
   headers: {
@@ -40,22 +47,12 @@ const request = axios.create({
 });
 
 // 请求拦截器
-request.interceptors.request.use(
+http.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // 添加 token
     const token = getToken();
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-
-    // 添加请求时间戳防止缓存（仅 GET 请求）
-    // if (config.method?.toUpperCase() === 'GET') {
-    //   config.params = {
-    //     ...config.params,
-    //     _t: Date.now(),
-    //   };
-    // }
-    console.log('dayw', config);
 
     return { ...config, showError: true };
   },
@@ -72,7 +69,6 @@ const errorHandler = (status: number, message: string) => {
       return '请求参数错误';
     case 401:
       clearAuth();
-      // 跳转到登录页
       window.location.href = '/login';
       return '登录已过期，请重新登录';
     case 403:
@@ -90,52 +86,44 @@ const errorHandler = (status: number, message: string) => {
   }
 };
 
-// 响应拦截器
-request.interceptors.response.use(
+// 响应拦截器：将业务 data 写入 response.data，供外层 request 再解包
+http.interceptors.response.use(
   (response: AxiosResponse<ApiResponse>) => {
     const { data, config } = response;
-    console.log('打印', response);
-    // debugger;
-    const { code, message } = data;
+    const { code, msg } = data;
 
-    // 文件下载 / Blob 响应直接返回
     if (config.responseType === 'blob') {
       return response;
     }
 
-    // 业务成功
     if (code === 0 || code === 200) {
-      // 成功提示
-      if (config.showSuccess && message) {
+      if (config.showSuccess === true && msg) {
         notification.success({
           message: '操作成功',
-          description: message,
+          description: msg,
           placement: 'topRight',
         });
       }
-      return data;
+      return { ...response, data: data.data };
     }
 
-    // 业务错误
     if (config.showError !== false) {
       notification.error({
         message: '请求失败',
-        description: message,
+        description: msg,
         placement: 'topRight',
       });
     }
 
-    return Promise.reject(new Error(message || '请求失败'));
+    return Promise.reject(new Error(msg || '请求失败'));
   },
   (error: AxiosError<ApiResponse>) => {
     const { response, config } = error;
 
-    // 请求被取消，不处理
     if (axios.isCancel(error)) {
       return Promise.reject(error);
     }
 
-    // 网络错误（无响应）
     if (!response) {
       if (config?.showError !== false) {
         notification.error({
@@ -148,9 +136,8 @@ request.interceptors.response.use(
     }
 
     const { status, data } = response;
-    const errorMsg = errorHandler(status, data?.message || '');
+    const errorMsg = errorHandler(status, data?.msg || '');
 
-    // 401 错误已经在上层处理了跳转逻辑
     if (status !== 401 && config?.showError !== false) {
       notification.error({
         message: `请求错误 ${status}`,
@@ -162,5 +149,25 @@ request.interceptors.response.use(
     return Promise.reject(new Error(errorMsg));
   },
 );
+
+/** 对外 request：直接返回业务 data（T），而非 AxiosResponse */
+const request = {
+  async get<T = unknown>(url: string, config?: RequestConfig): Promise<T> {
+    const res = await http.get<T>(url, config);
+    return res.data;
+  },
+  async post<T = unknown>(url: string, data?: unknown, config?: RequestConfig): Promise<T> {
+    const res = await http.post<T>(url, data, config);
+    return res.data;
+  },
+  async put<T = unknown>(url: string, data?: unknown, config?: RequestConfig): Promise<T> {
+    const res = await http.put<T>(url, data, config);
+    return res.data;
+  },
+  async delete<T = unknown>(url: string, config?: RequestConfig): Promise<T> {
+    const res = await http.delete<T>(url, config);
+    return res.data;
+  },
+};
 
 export default request;
