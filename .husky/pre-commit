@@ -1,1 +1,10 @@
-pnpm lint-staged
+#!/usr/bin/env sh
+
+if command -v pnpm >/dev/null 2>&1; then
+  pnpm lint-staged
+elif command -v bun >/dev/null 2>&1; then
+  bun lint-staged
+else
+  echo "Neither pnpm nor bun found"
+  exit 1
+fi
