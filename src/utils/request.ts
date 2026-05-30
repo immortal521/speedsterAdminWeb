@@ -7,7 +7,9 @@ import type {
 } from 'axios';
 import axios from 'axios';
 
+import type { ApiResponse } from '../types/api';
 import { clearAuth, getToken } from './auth';
+import { handleUnauthorized } from './tokenRefresh';
 
 // 扩展 InternalAxiosRequestConfig 类型
 declare module 'axios' {
@@ -16,26 +18,19 @@ declare module 'axios' {
     showError?: boolean;
     /** 是否显示成功提示，默认 false */
     showSuccess?: boolean;
+    /** 是否跳过 401 自动刷新 */
+    _skipTokenRefresh?: boolean;
+    /** 是否为刷新后的重试请求 */
+    _retry?: boolean;
+    /** 是否不携带 Authorization（登录、刷新 token 等） */
+    _skipAuth?: boolean;
   }
 }
 
-// 响应数据结构（根据后端实际返回调整）
-export interface ApiResponse<T = unknown> {
-  code: number;
-  data: T;
-  msg: string;
-  success: boolean;
-}
+export type { ApiResponse, PaginatedData } from '../types/api';
 
-// 分页响应结构
-export interface PaginatedData<T = unknown> {
-  list: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-}
-
-type RequestConfig = AxiosRequestConfig;
+type RequestConfig = AxiosRequestConfig &
+  Pick<InternalAxiosRequestConfig, '_skipAuth' | '_skipTokenRefresh' | 'showError' | 'showSuccess'>;
 
 // 内部 axios 实例（拦截器必须返回 AxiosResponse）
 const http = axios.create({
@@ -49,9 +44,11 @@ const http = axios.create({
 // 请求拦截器
 http.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = getToken();
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (!config._skipAuth) {
+      const token = getToken();
+      if (token && config.headers) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
 
     return { ...config, showError: true };
@@ -68,8 +65,6 @@ const errorHandler = (status: number, message: string) => {
     case 400:
       return '请求参数错误';
     case 401:
-      clearAuth();
-      window.location.href = '/login';
       return '登录已过期，请重新登录';
     case 403:
       return '没有权限访问该资源';
@@ -117,11 +112,20 @@ http.interceptors.response.use(
 
     return Promise.reject(new Error(msg || '请求失败'));
   },
-  (error: AxiosError<ApiResponse>) => {
+  async (error: AxiosError<ApiResponse>) => {
     const { response, config } = error;
 
     if (axios.isCancel(error)) {
       return Promise.reject(error);
+    }
+
+    // 401：尝试 refresh token 后重试
+    if (response?.status === 401 && config) {
+      try {
+        return await handleUnauthorized(error, (retryConfig) => http.request(retryConfig));
+      } catch {
+        // handleUnauthorized 内已处理跳转，继续走下方错误提示
+      }
     }
 
     if (!response) {
@@ -138,7 +142,10 @@ http.interceptors.response.use(
     const { status, data } = response;
     const errorMsg = errorHandler(status, data?.msg || '');
 
-    if (status !== 401 && config?.showError !== false) {
+    if (status === 401) {
+      clearAuth();
+      window.location.href = '/login';
+    } else if (config?.showError !== false) {
       notification.error({
         message: `请求错误 ${status}`,
         description: errorMsg,
@@ -171,3 +178,4 @@ const request = {
 };
 
 export default request;
+export { http };

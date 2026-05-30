@@ -1,3 +1,5 @@
+import type { AuthTokenData } from '../types/api';
+
 const TOKEN_KEY = 'access_token';
 const REFRESH_TOKEN_KEY = 'refresh_token';
 
@@ -20,4 +22,12 @@ export const setRefreshToken = (token: string): void => {
 export const clearAuth = (): void => {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);
+};
+
+/** 登录 / 刷新成功后写入 token */
+export const applyTokenPair = ({ accessToken, refreshToken }: AuthTokenData): void => {
+  setToken(accessToken);
+  if (refreshToken) {
+    setRefreshToken(refreshToken);
+  }
 };

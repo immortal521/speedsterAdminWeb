@@ -3,58 +3,49 @@ import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 
 import { Loading } from '../components';
-const Login = lazy(() => import('../pages/Login'));
+import { GuestGuard, RouteGuard } from '../components/RouteGuard';
 
-// 路由配置
+const Login = lazy(() => import('../pages/Login'));
+const MainLayout = lazy(() => import('../layouts/MainLayout'));
+const Dashboard = lazy(() => import('../pages/Dashboard'));
+
 export const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <Navigate to="/login" replace />,
-  },
   {
     path: '/login',
     element: (
-      <Suspense fallback={<Loading />}>
-        <Login />
-      </Suspense>
+      <GuestGuard>
+        <Suspense fallback={<Loading />}>
+          <Login />
+        </Suspense>
+      </GuestGuard>
     ),
   },
-  // {
-  //   path: '/',
-  //   element: (
-  //     <RouteGuard>
-  //       <MainLayout />
-  //     </RouteGuard>
-  //   ),
-  //   children: [
-  //     {
-  //       index: true,
-  //       element: <Navigate to="/dashboard" replace />,
-  //     },
-  //     {
-  //       path: 'dashboard',
-  //       element: (
-  //         <Suspense fallback={<Loading />}>
-  //           <Dashboard />
-  //         </Suspense>
-  //       ),
-  //     },
-  //     {
-  //       path: 'users',
-  //       element: (
-  //         <Suspense fallback={<Loading />}>
-  //           <UserManagement />
-  //         </Suspense>
-  //       ),
-  //     },
-  //     {
-  //       path: '*',
-  //       element: (
-  //         <Suspense fallback={<Loading />}>
-  //           <NotFound />
-  //         </Suspense>
-  //       ),
-  //     },
-  //   ],
-  // },
+  {
+    path: '/',
+    element: (
+      <RouteGuard>
+        <Suspense fallback={<Loading />}>
+          <MainLayout />
+        </Suspense>
+      </RouteGuard>
+    ),
+    children: [
+      {
+        index: true,
+        element: <Navigate to="/dashboard" replace />,
+      },
+      {
+        path: 'dashboard',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <Dashboard />
+          </Suspense>
+        ),
+      },
+    ],
+  },
+  {
+    path: '*',
+    element: <Navigate to="/dashboard" replace />,
+  },
 ]);

@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import { fetchLogin, type ILoginParams } from '../../api/user';
-import { clearAuth, getToken, setToken as saveToken } from '../../utils/auth';
+import { applyTokenPair, clearAuth, getToken, setToken as saveToken } from '../../utils/auth';
 
 interface User {
   id: number;
@@ -65,9 +65,9 @@ export const userSlice = createSlice({
       })
       .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
-        state.token = action.payload.token;
+        state.token = action.payload.accessToken;
         state.isAuthenticated = true;
-        saveToken(action.payload.token);
+        applyTokenPair(action.payload);
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
