@@ -1,7 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
 
-import { useAppSelector } from '../../store/hooks';
-import { selectIsAuthenticated } from '../../store/slices/userSlice';
+import { useAppSelector } from '@/store/hooks';
+import { selectIsAuthenticated } from '@/store/slices/userSlice';
 
 interface RouteGuardProps {
   children: React.ReactNode;

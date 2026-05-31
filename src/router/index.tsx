@@ -2,12 +2,12 @@
 import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 
-import { Loading } from '../components';
-import { GuestGuard, RouteGuard } from '../components/RouteGuard';
+import { Loading } from '@/components';
+import { GuestGuard, RouteGuard } from '@/components/RouteGuard';
 
-const Login = lazy(() => import('../pages/Login'));
-const MainLayout = lazy(() => import('../layouts/MainLayout'));
-const Dashboard = lazy(() => import('../pages/Dashboard'));
+const Login = lazy(() => import('@/pages/Login'));
+const MainLayout = lazy(() => import('@/layouts/MainLayout'));
+const Dashboard = lazy(() => import('@/pages/Dashboard'));
 
 export const router = createBrowserRouter([
   {

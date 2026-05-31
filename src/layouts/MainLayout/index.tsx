@@ -9,8 +9,8 @@ import {
 } from '@ant-design/icons';
 import { Avatar, Dropdown, Layout, Menu, type MenuProps, Space, Typography } from 'antd';
 
-import { useAppDispatch } from '../../store/hooks';
-import { logout } from '../../store/slices/userSlice';
+import { useAppDispatch } from '@/store/hooks';
+import { logout } from '@/store/slices/userSlice';
 
 import './index.css';
 

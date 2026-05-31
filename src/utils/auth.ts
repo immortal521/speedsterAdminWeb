@@ -1,4 +1,4 @@
-import type { AuthTokenData } from '../types/api';
+import type { AuthTokenData } from '@/types/api';
 
 const TOKEN_KEY = 'access_token';
 const REFRESH_TOKEN_KEY = 'refresh_token';
