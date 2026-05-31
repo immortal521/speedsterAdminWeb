@@ -7,7 +7,8 @@ import type {
 } from 'axios';
 import axios from 'axios';
 
-import type { ApiResponse } from '../types/api';
+import type { ApiResponse } from '@/types/api';
+
 import { clearAuth, getToken } from './auth';
 import { handleUnauthorized } from './tokenRefresh';
 
@@ -27,7 +28,8 @@ declare module 'axios' {
   }
 }
 
-export type { ApiResponse, PaginatedData } from '../types/api';
+export type { ApiResponse, PaginatedData } from '@/types/api';
+export { http };
 
 type RequestConfig = AxiosRequestConfig &
   Pick<InternalAxiosRequestConfig, '_skipAuth' | '_skipTokenRefresh' | 'showError' | 'showSuccess'>;
@@ -178,4 +180,3 @@ const request = {
 };
 
 export default request;
-export { http };

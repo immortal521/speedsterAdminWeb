@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { DashboardOutlined, LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Card, Form, Input, message } from 'antd';
 
-import type { ILoginParams } from '../../api/user';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { login, selectUserLoading } from '../../store/slices/userSlice';
+import type { ILoginParams } from '@/api/user';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { login, selectUserLoading } from '@/store/slices/userSlice';
 
 import './index.css';
 

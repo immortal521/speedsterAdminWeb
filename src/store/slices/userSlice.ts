@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-import { fetchLogin, type ILoginParams } from '../../api/user';
-import { applyTokenPair, clearAuth, getToken, setToken as saveToken } from '../../utils/auth';
+import { fetchLogin, type ILoginParams } from '@/api/user';
+import { applyTokenPair, clearAuth, getToken, setToken as saveToken } from '@/utils/auth';
 
 interface User {
   id: number;

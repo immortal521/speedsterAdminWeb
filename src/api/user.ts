@@ -1,5 +1,5 @@
-import type { AuthTokenData } from '../types/api';
-import request from '../utils/request';
+import type { AuthTokenData } from '@/types/api';
+import request from '@/utils/request';
 
 export interface ILoginParams {
   username: string;

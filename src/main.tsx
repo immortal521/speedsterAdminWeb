@@ -6,8 +6,8 @@ import { RouterProvider } from 'react-router-dom';
 import { ConfigProvider } from 'antd';
 import zhCN from 'antd/locale/zh_CN';
 
-import { router } from './router';
-import { store } from './store';
+import { router } from '@/router';
+import { store } from '@/store';
 
 import './index.css';
 
