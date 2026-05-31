@@ -51,7 +51,7 @@ export default function Login() {
       </div>
 
       <div className="login-page-panel">
-        <Card className="login-page-card" bordered={false}>
+        <Card className="login-page-card" variant={'borderless'}>
           <div className="login-page-card-header">
             <h2>欢迎登录</h2>
             <p>请输入您的账号和密码</p>

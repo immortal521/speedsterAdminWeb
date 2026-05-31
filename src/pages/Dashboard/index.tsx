@@ -28,7 +28,7 @@ export default function Dashboard() {
       <Row gutter={[16, 16]}>
         {statCards.map((item) => (
           <Col xs={24} sm={12} lg={6} key={item.label}>
-            <Card className="dashboard-page-stat-card" bordered={false}>
+            <Card className="dashboard-page-stat-card" variant={'borderless'}>
               <div className="dashboard-page-stat-row">
                 <div>
                   <div className="dashboard-page-stat-value">{item.value}</div>
@@ -43,7 +43,7 @@ export default function Dashboard() {
 
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={14}>
-          <Card title="数据概览" bordered={false} className="dashboard-page-quick-card">
+          <Card title="数据概览" variant={'borderless'} className="dashboard-page-quick-card">
             <Typography.Paragraph type="secondary" className="dashboard-page-overview-desc">
               当前为演示数据，后续接入接口后将展示订单趋势、热门商品等图表。
             </Typography.Paragraph>
@@ -51,7 +51,7 @@ export default function Dashboard() {
           </Card>
         </Col>
         <Col xs={24} lg={10}>
-          <Card title="快捷入口" bordered={false} className="dashboard-page-quick-card">
+          <Card title="快捷入口" variant={'borderless'} className="dashboard-page-quick-card">
             {quickEntries.map((item) => (
               <div className="dashboard-page-quick-item" key={item.title}>
                 <div className="dashboard-page-quick-icon">
